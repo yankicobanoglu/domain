@@ -26,7 +26,7 @@ function App() {
       <div className="relative pt-20 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
         <div className="inline-flex items-center justify-center p-2 bg-indigo-500/10 rounded-full mb-8 ring-1 ring-indigo-500/30 backdrop-blur-sm">
           <Sparkles className="w-5 h-5 text-indigo-400 mr-2" />
-          <span className="text-indigo-200 text-sm font-medium">Welcome to my personal playground</span>
+          <span className="text-indigo-200 text-sm font-medium">Welcome</span>
         </div>
         
         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
