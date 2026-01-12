@@ -12,14 +12,15 @@ export const MY_GAMES: Game[] = [
     description: 'Dual N-Back: Working memory enhancer!',
     category: 'Cognitive',
     url: 'https://dualnback.yankicobanoglu.com',
-    image: 'https://placehold.co/1200x630/1e293b/4f46e5?text=Dual+N-Back', // Replace with real screenshot URL
+    // REAL IMAGE: Abstract Neural Network / Brain Visualization (Blue)
+    image: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1200&h=630&fit=crop',
     
     // SEO Optimization
     seoTitle: 'Free Dual N-Back | Train Working Memory & Fluid Intelligence',
-    seoDescription: 'Play the scientifically proven Dual N-Back brain training game online for free. Improve your working memory and focus.',
+    seoDescription: 'Play the Dual N-Back brain training game online for free. Improve your working memory and focus.',
     seoContent: `
       <h1>Dual N-Back Brain Training</h1>
-      <p>This is a free implementation of the N-Back task, a performance task that is commonly used as an assessment in cognitive neuroscience to measure a part of working memory and working memory capacity.</p>
+      <p>This is a free implementation of the N-Back game, a performance task that is commonly used as an assessment in cognitive neuroscience to measure a part of working memory and working memory capacity.</p>
       <h2>How to Play</h2>
       <p>You will be presented with a sequence of stimuli (audio and visual). The task consists of indicating when the current stimulus matches the one from n steps earlier in the sequence. The load factor n can be adjusted to make the task more difficult.</p>
       <h2>Benefits</h2>
@@ -33,11 +34,12 @@ export const MY_GAMES: Game[] = [
     description: 'Imposter word game, find the imposter among your friends!',
     category: 'Fun',
     url: 'https://imposter.yankicobanoglu.com',
-    image: 'https://placehold.co/1200x630/1e293b/ec4899?text=Imposter', // Replace with real screenshot URL
+    // REAL IMAGE: Neon "Who are you?" sign - fits the Imposter theme perfectly
+    image: 'https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=1200&h=630&fit=crop',
 
     // SEO Optimization
     seoTitle: 'Play Imposter Online | Social Deduction Word Game',
-    seoDescription: 'A free browser-based party game similar to Spyfall and Among Us. Find the imposter among your friends using one-word clues.',
+    seoDescription: 'A free browser-based party game similar to Imposter/Impostor and Among Us. Find the imposter among your friends using one-word clues.',
     seoContent: `
       <h1>Imposter - The Social Deduction Party Game</h1>
       <p>Imposter is a multiplayer party game for 3-10 players. It is a game of deception, deduction, and word association.</p>

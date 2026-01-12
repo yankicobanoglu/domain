@@ -35,11 +35,15 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
         "@type": "VideoGame",
         "name": game.title,
         "description": game.description,
-        "image": game.image || "", 
+        "image": [game.image], // Wrapping in array is often safer for Google
         "url": window.location.href,
         "genre": [game.category],
-        "operatingSystem": "Browser",
+        "operatingSystem": "Any", // "Browser" is sometimes rejected, "Any" is safer
         "applicationCategory": "Game",
+        "author": {
+          "@type": "Person",
+          "name": "Yanki Cobanoglu"
+        },
         "offers": {
           "@type": "Offer",
           "price": "0",
