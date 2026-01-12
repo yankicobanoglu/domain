@@ -6,35 +6,43 @@ import { GameViewer } from './components/GameViewer';
 import { Game } from './types';
 
 function App() {
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  // OPTIMIZATION: Initialize state synchronously based on URL.
+  // This helps SEO bots see the game content immediately without waiting for a useEffect pass.
+  const [selectedGame, setSelectedGame] = useState<Game | null>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const gameSlug = params.get('game');
+      if (gameSlug) {
+        return MY_GAMES.find(g => g.slug === gameSlug) || null;
+      }
+    }
+    return null;
+  });
 
-  // 1. Handle URL Parameters on initial load and PopState
+  // Handle Browser Back/Forward buttons
   useEffect(() => {
     const handleLocationChange = () => {
       const params = new URLSearchParams(window.location.search);
       const gameSlug = params.get('game');
       if (gameSlug) {
         const foundGame = MY_GAMES.find(g => g.slug === gameSlug);
-        if (foundGame) {
-          setSelectedGame(foundGame);
-          return;
-        }
+        setSelectedGame(foundGame || null);
+      } else {
+        setSelectedGame(null);
       }
-      setSelectedGame(null);
     };
 
-    handleLocationChange();
     window.addEventListener('popstate', handleLocationChange);
     return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
 
-  // 2. Inject Home JSON-LD Schema (only when no game is selected)
+  // Inject Home JSON-LD Schema (only when no game is selected)
   useEffect(() => {
     if (selectedGame) return;
 
     const schemaScript = document.createElement('script');
     schemaScript.type = 'application/ld+json';
-    schemaScript.text = JSON.stringify({
+    schemaScript.textContent = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "CollectionPage",
       "headline": APP_TITLE,
@@ -59,7 +67,7 @@ function App() {
     };
   }, [selectedGame]);
 
-  // 3. Navigation Handlers
+  // Navigation Handlers
   const handleGameSelect = (game: Game) => {
     const newUrl = `?game=${game.slug}`;
     window.history.pushState({ path: newUrl }, '', newUrl);

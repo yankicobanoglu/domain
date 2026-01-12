@@ -41,11 +41,13 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
     // 4. Inject JSON-LD Schema for "VideoGame"
     const schemaScript = document.createElement('script');
     schemaScript.type = 'application/ld+json';
-    schemaScript.text = JSON.stringify({
+    // Use textContent instead of text for better compatibility
+    schemaScript.textContent = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "VideoGame",
       "name": game.title,
       "description": game.description,
+      "image": game.image || "", // Required for Rich Results
       "url": window.location.href,
       "genre": [game.category],
       "operatingSystem": "Browser",

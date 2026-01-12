@@ -12,6 +12,7 @@ export const MY_GAMES: Game[] = [
     description: 'Dual N-Back: Working memory enhancer!',
     category: 'Cognitive',
     url: 'https://dualnback.yankicobanoglu.com',
+    image: 'https://placehold.co/1200x630/1e293b/4f46e5?text=Dual+N-Back', // Replace with real screenshot URL
     
     // SEO Optimization
     seoTitle: 'Free Dual N-Back | Train Working Memory & Fluid Intelligence',
@@ -32,6 +33,7 @@ export const MY_GAMES: Game[] = [
     description: 'Imposter word game, find the imposter among your friends!',
     category: 'Fun',
     url: 'https://imposter.yankicobanoglu.com',
+    image: 'https://placehold.co/1200x630/1e293b/ec4899?text=Imposter', // Replace with real screenshot URL
 
     // SEO Optimization
     seoTitle: 'Play Imposter Online | Social Deduction Word Game',
