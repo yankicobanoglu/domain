@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Gamepad2, Sparkles } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 import { MY_GAMES, APP_TITLE, APP_SUBTITLE } from './constants';
 import { GameCard } from './components/GameCard';
 import { GameViewer } from './components/GameViewer';
@@ -141,6 +142,7 @@ function App() {
           </p>
         </div>
       </footer>
+      <Analytics />
     </div>
   );
 }
