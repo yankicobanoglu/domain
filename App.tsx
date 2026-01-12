@@ -20,10 +20,10 @@ function App() {
 
   // Otherwise, show the Arcade Menu
   return (
-    <div className="min-h-screen bg-slate-900 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black text-white selection:bg-indigo-500/30">
+    <div className="min-h-screen flex flex-col bg-slate-900 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black text-white selection:bg-indigo-500/30">
       
       {/* Hero Section */}
-      <div className="relative pt-20 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center">
+      <div className="relative pt-20 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center w-full">
         <div className="inline-flex items-center justify-center p-2 bg-indigo-500/10 rounded-full mb-8 ring-1 ring-indigo-500/30 backdrop-blur-sm">
           <Sparkles className="w-5 h-5 text-indigo-400 mr-2" />
           <span className="text-indigo-200 text-sm font-medium">Welcome</span>
@@ -41,7 +41,7 @@ function App() {
       </div>
 
       {/* Grid Section */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
           {MY_GAMES.map((game) => (
             <GameCard 
@@ -63,7 +63,7 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-950/50 backdrop-blur-lg">
+      <footer className="border-t border-slate-800 bg-slate-950/50 backdrop-blur-lg mt-auto">
         <div className="max-w-7xl mx-auto py-8 px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-slate-400 text-sm">
             <Gamepad2 size={16} />

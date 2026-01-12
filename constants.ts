@@ -18,8 +18,6 @@ export const MY_GAMES: Game[] = [
     // Example: 'https://space.yourname.com'
     // IMPORTANT: You must include 'https://'
     url: 'https://dualnback.yankicobanoglu.com', 
-    
-    thumbnail: 'https://picsum.photos/id/119/800/600', 
   },
   {
     id: 'game-2',
@@ -31,8 +29,6 @@ export const MY_GAMES: Game[] = [
     // Example: 'https://puzzle.yourname.com'
     // IMPORTANT: You must include 'https://'
     url: 'https://imposter.yankicobanoglu.com',
-    
-    thumbnail: 'https://picsum.photos/id/96/800/600',
   }
 ];
 
