@@ -25,23 +25,29 @@ Do this for **each** of your existing game projects on Vercel:
 
 ## Step 3: Configure Main Domain (Vercel)
 1. Go to your new **Menu Project** (from Step 1) > **Settings** > **Domains**.
-2. Enter your main domain (e.g., `yourdomain.com`).
-3. Vercel will give you an **A Record Value** (usually `76.76.21.21`).
-4. **Copy this value.**
+2. **IMPORTANT**: You must add **TWO** domains here:
+   - `yourdomain.com` (no www)
+   - `www.yourdomain.com`
+3. Vercel will likely configure a redirect automatically (e.g., Root redirects to WWW). This is good.
+4. Note the **A Record** (usually `76.76.21.21`) and **CNAME** (`cname.vercel-dns.com`) values Vercel shows you.
 
-## Step 4: Configure Namecheap DNS
+## Step 4: Configure Namecheap DNS (CRITICAL STEP)
+This is where "Server Not Found" errors usually happen. Follow exactly:
+
 1. Log in to Namecheap > **Domain List** > **Manage** > **Advanced DNS**.
-2. **Delete** any pre-existing records (like "Parking" or "Redirect").
-3. Add the following records:
+2. **DELETE ALL PRE-EXISTING RECORDS**.
+   - Look specifically for "URL Redirect Record" or "Parking". Delete them.
+   - Look for any "AAAA" records. Delete them (unless you explicitly set them up for Vercel).
+3. Add only these records:
 
-| Type | Host | Value |
-| :--- | :--- | :--- |
-| **A Record** | `@` | `76.76.21.21` |
-| **CNAME Record** | `www` | `cname.vercel-dns.com` |
-| **CNAME Record** | `space` | `cname.vercel-dns.com` |
-| **CNAME Record** | `puzzle` | `cname.vercel-dns.com` |
+| Type | Host | Value | TTL |
+| :--- | :--- | :--- | :--- |
+| **A Record** | `@` | `76.76.21.21` | Automatic |
+| **CNAME Record** | `www` | `cname.vercel-dns.com` | Automatic |
+| **CNAME Record** | `space` | `cname.vercel-dns.com` | Automatic |
+| **CNAME Record** | `puzzle` | `cname.vercel-dns.com` | Automatic |
 
-*(Replace `space` and `puzzle` with whatever names you chose in Step 2)*.
+*(Replace `space` and `puzzle` with your game subdomains)*.
 
 ## Step 5: Final Code Update
 1. Wait 30 minutes for DNS to propagate.
@@ -50,8 +56,14 @@ Do this for **each** of your existing game projects on Vercel:
    ```typescript
    url: 'https://space.yourdomain.com'
    ```
-4. Commit and Push to GitHub. Vercel updates automatically.
+4. Commit and Push to GitHub.
 
-## Troubleshooting
-*   **Site not loading?** DNS can take up to 24 hours globally, but usually takes 30 mins.
-*   **"Vercel says Invalid Configuration"?** Ensure the values in Namecheap match exactly what Vercel showed you.
+---
+
+## Troubleshooting "Server Not Found" on Mobile
+If desktop works but mobile Safari fails:
+
+1. **IPv6 Conflict**: Ensure you deleted any **AAAA Records** in Namecheap. Mobile networks prefer IPv6, and if an old parking record exists, it will break the connection.
+2. **Propagation**: Mobile networks cache DNS longer. Toggle **Airplane Mode** on/off to flush the cache.
+3. **Redirect Loop**: Ensure you added BOTH `yourdomain.com` and `www.yourdomain.com` in Vercel. If you only added one, the redirect chain might break on some devices.
+4. **Typo**: Check that `constants.ts` URLs start with `https://` and have no typos.
