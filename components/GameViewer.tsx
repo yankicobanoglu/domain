@@ -12,17 +12,17 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // SEO: Update Title and Meta Description when game loads
+  // SEO: Update Title, Meta Description, and inject JSON-LD Schema
   useEffect(() => {
-    // Save original title
+    // 1. Save original title
     const originalTitle = document.title;
     
-    // Update to optimized title
+    // 2. Update to optimized title
     if (game.seoTitle) {
       document.title = game.seoTitle;
     }
 
-    // Update meta description
+    // 3. Update meta description
     const metaDescription = document.querySelector('meta[name="description"]');
     let originalMetaContent = '';
     
@@ -32,18 +32,40 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
         metaDescription.setAttribute('content', game.seoDescription);
       }
     } else if (game.seoDescription) {
-      // Create it if it doesn't exist
       const meta = document.createElement('meta');
       meta.name = 'description';
       meta.content = game.seoDescription;
       document.head.appendChild(meta);
     }
 
-    // Cleanup: Restore original title/meta when leaving the game
+    // 4. Inject JSON-LD Schema for "VideoGame"
+    const schemaScript = document.createElement('script');
+    schemaScript.type = 'application/ld+json';
+    schemaScript.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "VideoGame",
+      "name": game.title,
+      "description": game.description,
+      "url": window.location.href,
+      "genre": [game.category],
+      "operatingSystem": "Browser",
+      "applicationCategory": "Game",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      }
+    });
+    document.head.appendChild(schemaScript);
+
+    // Cleanup: Restore original title/meta and remove schema when leaving the game
     return () => {
       document.title = originalTitle;
       if (metaDescription) {
         metaDescription.setAttribute('content', originalMetaContent);
+      }
+      if (document.head.contains(schemaScript)) {
+        document.head.removeChild(schemaScript);
       }
     };
   }, [game]);

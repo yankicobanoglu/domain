@@ -8,7 +8,7 @@ import { Game } from './types';
 function App() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 
-  // 1. Handle URL Parameters on initial load and PopState (Browser Back Button)
+  // 1. Handle URL Parameters on initial load and PopState
   useEffect(() => {
     const handleLocationChange = () => {
       const params = new URLSearchParams(window.location.search);
@@ -23,29 +23,56 @@ function App() {
       setSelectedGame(null);
     };
 
-    // Check on mount
     handleLocationChange();
-
-    // Listen for browser back/forward buttons
     window.addEventListener('popstate', handleLocationChange);
     return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
 
-  // 2. Handler for selecting a game (updates URL)
+  // 2. Inject Home JSON-LD Schema (only when no game is selected)
+  useEffect(() => {
+    if (selectedGame) return;
+
+    const schemaScript = document.createElement('script');
+    schemaScript.type = 'application/ld+json';
+    schemaScript.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "headline": APP_TITLE,
+      "description": "A personal game portal to host and launch multiple web games from a single domain.",
+      "url": window.location.href.split('?')[0],
+      "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": MY_GAMES.map((game, index) => ({
+          "@type": "ListItem",
+          "position": index + 1,
+          "url": `${window.location.origin}/?game=${game.slug}`,
+          "name": game.title
+        }))
+      }
+    });
+    document.head.appendChild(schemaScript);
+
+    return () => {
+      if (document.head.contains(schemaScript)) {
+        document.head.removeChild(schemaScript);
+      }
+    };
+  }, [selectedGame]);
+
+  // 3. Navigation Handlers
   const handleGameSelect = (game: Game) => {
     const newUrl = `?game=${game.slug}`;
     window.history.pushState({ path: newUrl }, '', newUrl);
     setSelectedGame(game);
   };
 
-  // 3. Handler for going back (updates URL)
   const handleBack = () => {
     const newUrl = window.location.pathname; // Should be just '/'
     window.history.pushState({ path: newUrl }, '', newUrl);
     setSelectedGame(null);
   };
 
-  // If a game is selected, show the viewer (Iframe)
+  // Render Game Viewer
   if (selectedGame) {
     return (
       <GameViewer 
@@ -55,7 +82,7 @@ function App() {
     );
   }
 
-  // Otherwise, show the Arcade Menu
+  // Render Arcade Menu
   return (
     <div className="min-h-screen flex flex-col bg-slate-900 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black text-white selection:bg-indigo-500/30">
       
