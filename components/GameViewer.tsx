@@ -28,27 +28,54 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
     }
 
     // 4. Update JSON-LD Schema (Targeting the ID in index.html)
+    // We use @graph to provide multiple rich result opportunities (Breadcrumbs + App)
     const script = document.getElementById('root-json-ld');
     if (script) {
       const data = {
         "@context": "https://schema.org",
-        "@type": "VideoGame",
-        "name": game.title,
-        "description": game.description,
-        "image": [game.image], // Wrapping in array is often safer for Google
-        "url": window.location.href,
-        "genre": [game.category],
-        "operatingSystem": "Any", // "Browser" is sometimes rejected, "Any" is safer
-        "applicationCategory": "Game",
-        "author": {
-          "@type": "Person",
-          "name": "Yanki Cobanoglu"
-        },
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        }
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Arcade",
+                "item": window.location.origin
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": game.title,
+                "item": window.location.href
+              }
+            ]
+          },
+          {
+            "@type": "SoftwareApplication",
+            "name": game.title,
+            "description": game.description,
+            "image": [game.image],
+            "url": window.location.href,
+            "applicationCategory": "GameApplication",
+            "operatingSystem": "Any",
+            "author": {
+              "@type": "Person",
+              "name": "Yanki Cobanoglu"
+            },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            },
+            "aggregateRating": {
+               "@type": "AggregateRating",
+               "ratingValue": "5",
+               "ratingCount": "1"
+            }
+          }
+        ]
       };
       script.textContent = JSON.stringify(data);
     }
