@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Gamepad2, Sparkles, Github } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Gamepad2, Sparkles } from 'lucide-react';
 import { MY_GAMES, APP_TITLE, APP_SUBTITLE } from './constants';
 import { GameCard } from './components/GameCard';
 import { GameViewer } from './components/GameViewer';
@@ -8,12 +8,49 @@ import { Game } from './types';
 function App() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 
+  // 1. Handle URL Parameters on initial load and PopState (Browser Back Button)
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const params = new URLSearchParams(window.location.search);
+      const gameSlug = params.get('game');
+      if (gameSlug) {
+        const foundGame = MY_GAMES.find(g => g.slug === gameSlug);
+        if (foundGame) {
+          setSelectedGame(foundGame);
+          return;
+        }
+      }
+      setSelectedGame(null);
+    };
+
+    // Check on mount
+    handleLocationChange();
+
+    // Listen for browser back/forward buttons
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
+
+  // 2. Handler for selecting a game (updates URL)
+  const handleGameSelect = (game: Game) => {
+    const newUrl = `?game=${game.slug}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+    setSelectedGame(game);
+  };
+
+  // 3. Handler for going back (updates URL)
+  const handleBack = () => {
+    const newUrl = window.location.pathname; // Should be just '/'
+    window.history.pushState({ path: newUrl }, '', newUrl);
+    setSelectedGame(null);
+  };
+
   // If a game is selected, show the viewer (Iframe)
   if (selectedGame) {
     return (
       <GameViewer 
         game={selectedGame} 
-        onBack={() => setSelectedGame(null)} 
+        onBack={handleBack} 
       />
     );
   }
@@ -47,7 +84,7 @@ function App() {
             <GameCard 
               key={game.id} 
               game={game} 
-              onSelect={setSelectedGame} 
+              onSelect={handleGameSelect} 
             />
           ))}
         </div>

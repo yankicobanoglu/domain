@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Game } from '../types';
 import { ArrowLeft, Maximize2, Minimize2, RefreshCw } from 'lucide-react';
 
@@ -11,6 +11,42 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
   const [key, setKey] = useState(0); // Used to reload the iframe
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // SEO: Update Title and Meta Description when game loads
+  useEffect(() => {
+    // Save original title
+    const originalTitle = document.title;
+    
+    // Update to optimized title
+    if (game.seoTitle) {
+      document.title = game.seoTitle;
+    }
+
+    // Update meta description
+    const metaDescription = document.querySelector('meta[name="description"]');
+    let originalMetaContent = '';
+    
+    if (metaDescription) {
+      originalMetaContent = metaDescription.getAttribute('content') || '';
+      if (game.seoDescription) {
+        metaDescription.setAttribute('content', game.seoDescription);
+      }
+    } else if (game.seoDescription) {
+      // Create it if it doesn't exist
+      const meta = document.createElement('meta');
+      meta.name = 'description';
+      meta.content = game.seoDescription;
+      document.head.appendChild(meta);
+    }
+
+    // Cleanup: Restore original title/meta when leaving the game
+    return () => {
+      document.title = originalTitle;
+      if (metaDescription) {
+        metaDescription.setAttribute('content', originalMetaContent);
+      }
+    };
+  }, [game]);
 
   const handleReload = () => {
     setIsLoading(true);
@@ -31,6 +67,29 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-slate-950 h-screen w-screen">
+      
+      {/* 
+        INVISIBLE SEO CONTENT 
+        This is hidden visually from users but available to Google Bots and Screen Readers.
+        It sits "behind" the iframe conceptually.
+      */}
+      {game.seoContent && (
+        <div 
+          style={{ 
+            position: 'absolute', 
+            width: '1px', 
+            height: '1px', 
+            padding: '0', 
+            margin: '-1px', 
+            overflow: 'hidden', 
+            clip: 'rect(0,0,0,0)', 
+            whiteSpace: 'nowrap', 
+            border: '0' 
+          }}
+          dangerouslySetInnerHTML={{ __html: game.seoContent }}
+        />
+      )}
+
       {/* Header Bar - Hidden in fullscreen mode if you wanted, but keeping it accessible is better for UX */}
       <div className="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800 shadow-md z-10">
         <div className="flex items-center gap-4">
