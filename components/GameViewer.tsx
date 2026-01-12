@@ -14,61 +14,49 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
 
   // SEO: Update Title, Meta Description, and inject JSON-LD Schema
   useEffect(() => {
-    // 1. Save original title
+    // 1. Save original title/meta to restore later
     const originalTitle = document.title;
-    
-    // 2. Update to optimized title
-    if (game.seoTitle) {
-      document.title = game.seoTitle;
-    }
-
-    // 3. Update meta description
     const metaDescription = document.querySelector('meta[name="description"]');
-    let originalMetaContent = '';
-    
-    if (metaDescription) {
-      originalMetaContent = metaDescription.getAttribute('content') || '';
-      if (game.seoDescription) {
-        metaDescription.setAttribute('content', game.seoDescription);
-      }
-    } else if (game.seoDescription) {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = game.seoDescription;
-      document.head.appendChild(meta);
+    const originalMetaContent = metaDescription ? metaDescription.getAttribute('content') : '';
+
+    // 2. Update Title
+    if (game.seoTitle) document.title = game.seoTitle;
+
+    // 3. Update Meta Description
+    if (metaDescription && game.seoDescription) {
+      metaDescription.setAttribute('content', game.seoDescription);
     }
 
-    // 4. Inject JSON-LD Schema for "VideoGame"
-    const schemaScript = document.createElement('script');
-    schemaScript.type = 'application/ld+json';
-    // Use textContent instead of text for better compatibility
-    schemaScript.textContent = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "VideoGame",
-      "name": game.title,
-      "description": game.description,
-      "image": game.image || "", // Required for Rich Results
-      "url": window.location.href,
-      "genre": [game.category],
-      "operatingSystem": "Browser",
-      "applicationCategory": "Game",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
-    });
-    document.head.appendChild(schemaScript);
+    // 4. Update JSON-LD Schema (Targeting the ID in index.html)
+    const script = document.getElementById('root-json-ld');
+    if (script) {
+      const data = {
+        "@context": "https://schema.org",
+        "@type": "VideoGame",
+        "name": game.title,
+        "description": game.description,
+        "image": game.image || "", 
+        "url": window.location.href,
+        "genre": [game.category],
+        "operatingSystem": "Browser",
+        "applicationCategory": "Game",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      };
+      script.textContent = JSON.stringify(data);
+    }
 
-    // Cleanup: Restore original title/meta and remove schema when leaving the game
+    // Cleanup: Restore original title/meta when leaving
     return () => {
       document.title = originalTitle;
-      if (metaDescription) {
+      if (metaDescription && originalMetaContent) {
         metaDescription.setAttribute('content', originalMetaContent);
       }
-      if (document.head.contains(schemaScript)) {
-        document.head.removeChild(schemaScript);
-      }
+      // We don't need to revert the JSON-LD manually here because 
+      // the App.tsx useEffect will kick in and overwrite it with home schema
     };
   }, [game]);
 

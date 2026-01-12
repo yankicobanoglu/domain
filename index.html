@@ -5,7 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>My Game Arcade</title>
     <meta name="description" content="A personal game portal to host and launch multiple web games from a single domain." />
-    <!-- We keep Tailwind CDN for simplicity, though normally you'd install it via package.json too -->
+    
+    <!-- Open Graph / Facebook / Discord Tags (Helps Rich Results) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="My Game Arcade" />
+    <meta property="og:description" content="A personal game portal to host and launch multiple web games from a single domain." />
+    <meta property="og:image" content="https://placehold.co/1200x630/1e293b/4f46e5?text=Game+Arcade" />
+    <meta property="og:url" content="https://www.yankicobanoglu.com/" />
+
+    <!-- Google Site Verification (Paste your code here if you haven't yet) -->
+    <!-- <meta name="google-site-verification" content="..." /> -->
+
+    <!-- DEFAULT JSON-LD (Crawler Fallback) -->
+    <!-- We give this an ID so React can find it and update it instantly -->
+    <script id="root-json-ld" type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "headline": "My Game Arcade",
+      "description": "A personal game portal to host and launch multiple web games from a single domain.",
+      "url": "https://www.yankicobanoglu.com/"
+    }
+    </script>
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;600;800&display=swap');

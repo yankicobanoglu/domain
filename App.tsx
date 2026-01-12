@@ -7,7 +7,6 @@ import { Game } from './types';
 
 function App() {
   // OPTIMIZATION: Initialize state synchronously based on URL.
-  // This helps SEO bots see the game content immediately without waiting for a useEffect pass.
   const [selectedGame, setSelectedGame] = useState<Game | null>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -36,35 +35,31 @@ function App() {
     return () => window.removeEventListener('popstate', handleLocationChange);
   }, []);
 
-  // Inject Home JSON-LD Schema (only when no game is selected)
+  // UPDATE HOME JSON-LD (Only when no game is selected)
+  // Instead of appending a new script, we update the one in index.html
   useEffect(() => {
     if (selectedGame) return;
 
-    const schemaScript = document.createElement('script');
-    schemaScript.type = 'application/ld+json';
-    schemaScript.textContent = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "CollectionPage",
-      "headline": APP_TITLE,
-      "description": "A personal game portal to host and launch multiple web games from a single domain.",
-      "url": window.location.href.split('?')[0],
-      "mainEntity": {
-        "@type": "ItemList",
-        "itemListElement": MY_GAMES.map((game, index) => ({
-          "@type": "ListItem",
-          "position": index + 1,
-          "url": `${window.location.origin}/?game=${game.slug}`,
-          "name": game.title
-        }))
-      }
-    });
-    document.head.appendChild(schemaScript);
-
-    return () => {
-      if (document.head.contains(schemaScript)) {
-        document.head.removeChild(schemaScript);
-      }
-    };
+    const script = document.getElementById('root-json-ld');
+    if (script) {
+      const data = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "headline": APP_TITLE,
+        "description": "A personal game portal to host and launch multiple web games from a single domain.",
+        "url": window.location.href.split('?')[0],
+        "mainEntity": {
+          "@type": "ItemList",
+          "itemListElement": MY_GAMES.map((game, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "url": `${window.location.origin}/?game=${game.slug}`,
+            "name": game.title
+          }))
+        }
+      };
+      script.textContent = JSON.stringify(data);
+    }
   }, [selectedGame]);
 
   // Navigation Handlers
