@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Game } from '../types';
 import { ArrowLeft, Maximize2, Minimize2, RefreshCw } from 'lucide-react';
 
@@ -11,6 +11,34 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
   const [key, setKey] = useState(0); // Used to reload the iframe
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Focus the iframe automatically when it loads so keyboard inputs work immediately
+  const handleIframeLoad = () => {
+    setIsLoading(false);
+    if (iframeRef.current) {
+      iframeRef.current.focus();
+    }
+  };
+
+  // Handle global Escape key to close the game
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        // If fullscreen, exit that first
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+          setIsFullscreen(false);
+        } else {
+          // Otherwise go back
+          onBack();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onBack]);
 
   // SEO: Update Title, Meta Description, and inject JSON-LD Schema
   useEffect(() => {
@@ -177,11 +205,12 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
         )}
         
         <iframe
+          ref={iframeRef}
           key={key}
           src={game.url}
           title={game.title}
           className="w-full h-full border-0 relative z-10"
-          onLoad={() => setIsLoading(false)}
+          onLoad={handleIframeLoad}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; gamepad"
           allowFullScreen
         />
