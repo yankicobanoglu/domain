@@ -50,5 +50,5 @@ export const MY_GAMES: Game[] = [
   }
 ];
 
-export const APP_TITLE = "PLAYGROUND";
-export const APP_SUBTITLE = "Select a game to start playing";
+export const APP_TITLE = "THE PLAYGROUND";
+export const APP_SUBTITLE = "Personal experiments in vibe-coding";

@@ -46,9 +46,13 @@ function App() {
       const data = {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
-        "headline": APP_TITLE,
+        "headline": "The Playground",
         "description": "A personal game portal to host and launch multiple web games from a single domain.",
         "url": window.location.href.split('?')[0],
+        "author": {
+            "@type": "Person",
+            "name": "Yanki Cobanoglu"
+        },
         "mainEntity": {
           "@type": "ItemList",
           "itemListElement": MY_GAMES.map((game, index) => ({
@@ -97,7 +101,7 @@ function App() {
           <span className="text-indigo-200 text-sm font-medium">Welcome</span>
         </div>
         
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-6 uppercase">
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 drop-shadow-lg">
             {APP_TITLE}
           </span>
@@ -138,7 +142,7 @@ function App() {
             <span>Powered by React & Vercel</span>
           </div>
           <p className="text-slate-500 text-sm">
-            © {new Date().getFullYear()} Vibed with Gemini
+            2026 Vibed with Gemini
           </p>
         </div>
       </footer>

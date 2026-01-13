@@ -68,7 +68,7 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
               {
                 "@type": "ListItem",
                 "position": 1,
-                "name": "Arcade",
+                "name": "The Playground",
                 "item": window.location.origin
               },
               {
@@ -169,7 +169,7 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
             className="flex items-center gap-2 px-3 py-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors text-sm font-medium"
           >
             <ArrowLeft size={18} />
-            Back to Playground
+            Back to Home
           </button>
           <div className="h-6 w-px bg-slate-700 hidden sm:block"></div>
           <h2 className="text-white font-bold hidden sm:block">{game.title}</h2>
