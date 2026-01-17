@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Game } from '../types';
-import { ArrowLeft, Maximize2, Minimize2, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Maximize2, Minimize2, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface GameViewerProps {
   game: Game;
@@ -11,7 +11,11 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
   const [key, setKey] = useState(0); // Used to reload the iframe
   const [isLoading, setIsLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isHeaderOpen, setIsHeaderOpen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  
+  // Ref to handle touch vs mouse conflict
+  const ignoreHoverRef = useRef(false);
 
   // Focus the iframe automatically when it loads so keyboard inputs work immediately
   const handleIframeLoad = () => {
@@ -42,21 +46,16 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
 
   // SEO: Update Title, Meta Description, and inject JSON-LD Schema
   useEffect(() => {
-    // 1. Save original title/meta to restore later
     const originalTitle = document.title;
     const metaDescription = document.querySelector('meta[name="description"]');
     const originalMetaContent = metaDescription ? metaDescription.getAttribute('content') : '';
 
-    // 2. Update Title
     if (game.seoTitle) document.title = game.seoTitle;
 
-    // 3. Update Meta Description
     if (metaDescription && game.seoDescription) {
       metaDescription.setAttribute('content', game.seoDescription);
     }
 
-    // 4. Update JSON-LD Schema (Targeting the ID in index.html)
-    // We use @graph to provide multiple rich result opportunities (Breadcrumbs + App)
     const script = document.getElementById('root-json-ld');
     if (script) {
       const data = {
@@ -108,14 +107,11 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
       script.textContent = JSON.stringify(data);
     }
 
-    // Cleanup: Restore original title/meta when leaving
     return () => {
       document.title = originalTitle;
       if (metaDescription && originalMetaContent) {
         metaDescription.setAttribute('content', originalMetaContent);
       }
-      // We don't need to revert the JSON-LD manually here because 
-      // the App.tsx useEffect will kick in and overwrite it with home schema
     };
   }, [game]);
 
@@ -136,14 +132,30 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
     }
   };
 
+  // Interaction Handlers for Header Drawer
+  const handleMouseEnter = () => {
+    if (!ignoreHoverRef.current) {
+      setIsHeaderOpen(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsHeaderOpen(false);
+  };
+
+  const handleTouchStart = () => {
+    ignoreHoverRef.current = true;
+  };
+
+  const toggleHeader = () => {
+    setIsHeaderOpen(prev => !prev);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-slate-950 h-screen w-screen">
+    // FIX #3: Use h-[100dvh] for mobile browsers to account for address bar
+    <div className="fixed inset-0 z-50 bg-slate-950 h-[100dvh] w-screen overflow-hidden font-sans">
       
-      {/* 
-        INVISIBLE SEO CONTENT 
-        This is hidden visually from users but available to Google Bots and Screen Readers.
-        It sits "behind" the iframe conceptually.
-      */}
+      {/* INVISIBLE SEO CONTENT */}
       {game.seoContent && (
         <div 
           style={{ 
@@ -161,42 +173,73 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
         />
       )}
 
-      {/* Header Bar - Hidden in fullscreen mode if you wanted, but keeping it accessible is better for UX */}
-      <div className="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800 shadow-md z-10">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack}
-            className="flex items-center gap-2 px-3 py-1.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition-colors text-sm font-medium"
-          >
-            <ArrowLeft size={18} />
-            Back to Home
-          </button>
-          <div className="h-6 w-px bg-slate-700 hidden sm:block"></div>
-          <h2 className="text-white font-bold hidden sm:block">{game.title}</h2>
+      {/* 
+        FIX #2: RETRACTABLE DRAWER HEADER
+        - Hidden by default (-translate-y-full)
+        - Slides down on hover (desktop) or handle tap (mobile)
+      */}
+      <div 
+        className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ease-in-out ${
+          isHeaderOpen ? 'translate-y-0' : '-translate-y-full'
+        }`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+      >
+        {/* Main Header Bar */}
+        <div className="bg-slate-900/95 backdrop-blur-md border-b border-white/10 shadow-2xl px-4 py-3">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={onBack}
+                className="flex items-center gap-2 px-3 py-1.5 text-slate-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors text-sm font-medium"
+              >
+                <ArrowLeft size={18} />
+                Back to Home
+              </button>
+              <div className="h-6 w-px bg-white/10 hidden sm:block"></div>
+              <h2 className="text-white font-bold hidden sm:block">{game.title}</h2>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={toggleFullscreen}
+                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              >
+                {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+              </button>
+              <button 
+                onClick={handleReload}
+                title="Reload Game"
+                className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <RefreshCw size={18} />
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={toggleFullscreen}
-            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+        {/* Drawer Handle (Hanging below the header) */}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px flex justify-center">
+          <button
+            onClick={toggleHeader}
+            className="flex items-center justify-center w-24 h-6 bg-slate-900/90 backdrop-blur-md border-b border-x border-white/10 rounded-b-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all shadow-lg group"
+            title="Toggle Menu"
           >
-            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-          </button>
-          <button 
-            onClick={handleReload}
-            title="Reload Game"
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
-          >
-            <RefreshCw size={18} />
+            {isHeaderOpen ? (
+              <ChevronUp size={16} className="group-hover:-translate-y-0.5 transition-transform" />
+            ) : (
+              <ChevronDown size={16} className="group-hover:translate-y-0.5 transition-transform" />
+            )}
           </button>
         </div>
       </div>
 
-      {/* Game Frame Area */}
-      <div className="flex-1 relative bg-black overflow-hidden">
+      {/* Game Frame Area - Fills the entire screen behind the header */}
+      <div className="absolute inset-0 z-0 bg-black">
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center text-indigo-400 bg-slate-900 z-0">
+          <div className="absolute inset-0 flex items-center justify-center text-indigo-400 bg-slate-900 z-10">
             <div className="flex flex-col items-center gap-4">
               <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
               <p className="animate-pulse">Loading {game.title}...</p>
@@ -209,7 +252,7 @@ export const GameViewer: React.FC<GameViewerProps> = ({ game, onBack }) => {
           key={key}
           src={game.url}
           title={game.title}
-          className="w-full h-full border-0 relative z-10"
+          className="w-full h-full border-0"
           onLoad={handleIframeLoad}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen; gamepad"
           allowFullScreen
