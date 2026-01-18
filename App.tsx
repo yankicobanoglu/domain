@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { MY_GAMES, APP_TITLE, APP_SUBTITLE } from './constants';
 import { GameCard } from './components/GameCard';
 import { GameViewer } from './components/GameViewer';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { Game } from './types';
 
 function App() {
@@ -18,6 +19,17 @@ function App() {
     }
     return null;
   });
+
+  // Track if privacy policy has been accepted
+  const [hasAcceptedPrivacy, setHasAcceptedPrivacy] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('privacy_accepted') === 'true';
+    }
+    return false;
+  });
+
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [pendingGame, setPendingGame] = useState<Game | null>(null);
 
   // Handle Browser Back/Forward buttons
   useEffect(() => {
@@ -37,7 +49,6 @@ function App() {
   }, []);
 
   // UPDATE HOME JSON-LD (Only when no game is selected)
-  // Instead of appending a new script, we update the one in index.html
   useEffect(() => {
     if (selectedGame) return;
 
@@ -67,17 +78,44 @@ function App() {
     }
   }, [selectedGame]);
 
-  // Navigation Handlers
-  const handleGameSelect = (game: Game) => {
+  // Launch the game logic (updates URL and State)
+  const launchGame = (game: Game) => {
     const newUrl = `?game=${game.slug}`;
     window.history.pushState({ path: newUrl }, '', newUrl);
     setSelectedGame(game);
+  };
+
+  // Click Handler: Gates access behind Privacy Policy
+  const handleGameSelect = (game: Game) => {
+    if (hasAcceptedPrivacy) {
+      launchGame(game);
+    } else {
+      setPendingGame(game);
+      setIsPrivacyOpen(true);
+    }
   };
 
   const handleBack = () => {
     const newUrl = window.location.pathname; // Should be just '/'
     window.history.pushState({ path: newUrl }, '', newUrl);
     setSelectedGame(null);
+  };
+
+  const handlePrivacyClose = () => {
+    setIsPrivacyOpen(false);
+    setPendingGame(null);
+  };
+
+  const handlePrivacyAccept = () => {
+    localStorage.setItem('privacy_accepted', 'true');
+    setHasAcceptedPrivacy(true);
+    setIsPrivacyOpen(false);
+    
+    // If the user was trying to open a game, launch it now
+    if (pendingGame) {
+      launchGame(pendingGame);
+      setPendingGame(null);
+    }
   };
 
   // Render Game Viewer
@@ -94,6 +132,13 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-900 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black text-white selection:bg-indigo-500/30">
       
+      {isPrivacyOpen && (
+        <PrivacyPolicy 
+          onClose={handlePrivacyClose} 
+          onAccept={handlePrivacyAccept}
+        />
+      )}
+
       {/* Hero Section */}
       <div className="relative pt-20 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto text-center w-full">
         <div className="inline-flex items-center justify-center p-2 bg-indigo-500/10 rounded-full mb-8 ring-1 ring-indigo-500/30 backdrop-blur-sm">
@@ -145,9 +190,17 @@ function App() {
               <span>Powered by React & Vercel</span>
             </div>
           </div>
-          <p className="text-slate-500 text-sm">
-            2026 Vibed with Gemini
-          </p>
+          <div className="flex items-center gap-6">
+             <button 
+                onClick={() => setIsPrivacyOpen(true)} 
+                className="text-slate-500 text-sm hover:text-indigo-400 transition-colors"
+             >
+                Privacy & Terms
+             </button>
+             <p className="text-slate-500 text-sm">
+                2026 Vibed with Gemini
+             </p>
+          </div>
         </div>
       </footer>
       <Analytics />
